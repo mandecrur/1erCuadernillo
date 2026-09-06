@@ -1,0 +1,1422 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Práctica del Cuadernillo I – 100 ejercicios</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f3f6fa;color:#172033}
+header{background:linear-gradient(135deg,#173b73,#2463a8);color:#fff;padding:24px 16px;text-align:center}
+header h1{margin:0 0 6px;font-size:24px}
+header p{margin:0;opacity:.92}
+.container{max-width:760px;margin:0 auto;padding:16px}
+.top{background:#fff;border-radius:16px;padding:15px;box-shadow:0 3px 14px #0001;margin-bottom:14px}
+.progress-wrap{height:10px;background:#e7ebf0;border-radius:99px;overflow:hidden}
+#progress{height:100%;width:1%;background:#2463a8;transition:.25s}
+.status{display:flex;justify-content:space-between;gap:10px;margin-top:9px;font-size:14px;color:#536070}
+.counters{display:flex;justify-content:center;gap:10px;margin-top:12px;flex-wrap:wrap}
+.counter{padding:8px 13px;border-radius:999px;font-weight:700;font-size:14px}
+.correct-counter{color:#28784b;background:#edf8f1}
+.wrong-counter{color:#b43b3b;background:#fff0f0}
+.card{background:#fff;border-radius:18px;padding:22px 18px;box-shadow:0 5px 20px #0001}
+.topic{display:inline-block;background:#eaf2fb;color:#2463a8;font-weight:bold;padding:7px 10px;border-radius:8px;font-size:13px}
+.situation{margin-top:15px;color:#687386;font-size:14px}
+.question{font-size:21px;line-height:1.45;font-weight:700;margin:12px 0 18px;min-height:60px}
+.options{display:grid;gap:11px}
+.option{width:100%;border:2px solid #dce3ec;background:#fff;border-radius:12px;padding:14px 15px;text-align:left;font-size:17px;cursor:pointer;transition:.15s}
+.option:hover:not(:disabled){background:#f5f8fc;border-color:#9fb9d8}
+.option:disabled{cursor:default}
+.option.correct{background:#eaf8ef;border-color:#42a56b;color:#17683a;font-weight:700}
+.option.wrong{background:#fff0f0;border-color:#d85c5c;color:#9d2626;font-weight:700}
+.option.selected{box-shadow:0 0 0 2px #2463a8 inset}
+.feedback{margin-top:15px;padding:12px 14px;border-radius:10px;font-size:16px;font-weight:600}
+.correct-feedback{background:#edf8f1;color:#28784b}
+.wrong-feedback{background:#fff0f0;color:#b43b3b}
+.explanation{margin-top:10px;padding:12px 14px;border-left:4px solid #2463a8;background:#f5f8fc;color:#536070;line-height:1.45}
+.next{display:none;width:100%;margin-top:16px;border:0;border-radius:12px;padding:14px;background:#2463a8;color:#fff;font-size:17px;font-weight:700;cursor:pointer}
+#final{display:none;text-align:center}
+.score{font-size:30px;font-weight:800;margin:15px 0}
+.restart{border:0;border-radius:12px;padding:13px 20px;background:#2463a8;color:#fff;font-size:16px;font-weight:700;cursor:pointer}
+@media(max-width:520px){
+  header h1{font-size:20px}
+  .container{padding:10px}
+  .card{padding:18px 14px}
+  .question{font-size:19px}
+  .option{font-size:16px;padding:13px}
+}
+</style>
+</head>
+<body>
+<header>
+<h1>Práctica del Cuadernillo I</h1>
+<p>100 ejercicios interactivos · Inglés básico</p>
+</header>
+
+<div class="container">
+  <div class="top">
+    <div class="progress-wrap"><div id="progress"></div></div>
+    <div class="status">
+      <span>Ejercicio <b id="currentNum">1</b> de <b id="totalNum">100</b></span>
+      <span>Progreso: <b id="percent">1%</b></span>
+    </div>
+    <div class="counters">
+      <span class="counter correct-counter">✓ Correctas: <b id="correctCount">0</b></span>
+      <span class="counter wrong-counter">✗ Incorrectas: <b id="wrongCount">0</b></span>
+    </div>
+  </div>
+
+  <div class="card" id="card">
+    <div class="topic" id="topic"></div>
+    <div class="situation" id="situation"></div>
+    <div class="question" id="question"></div>
+    <div class="options" id="options"></div>
+    <div class="feedback" id="feedback" style="display:none"></div>
+    <div class="explanation" id="explanation" style="display:none"></div>
+    <button class="next" id="nextBtn" type="button">Siguiente →</button>
+  </div>
+
+  <div class="card" id="final">
+    <h2>¡Práctica terminada!</h2>
+    <div class="score" id="finalScore"></div>
+    <p id="finalMessage"></p>
+    <button class="restart" id="restartBtn" type="button">Reiniciar práctica</button>
+  </div>
+</div>
+
+<script>
+const questions = [
+  {
+    "topic": "Pronombres personales",
+    "situation": "Identifica al sujeto.",
+    "question": "___ am a student.",
+    "options": [
+      "He",
+      "They",
+      "I"
+    ],
+    "answer": "I",
+    "explanation": "El pronombre I significa “yo” y se usa con am."
+  },
+  {
+    "topic": "Pronombres personales",
+    "situation": "Identifica al sujeto.",
+    "question": "Mary is happy. ___ is happy.",
+    "options": [
+      "He",
+      "She",
+      "We"
+    ],
+    "answer": "She",
+    "explanation": "Mary es una persona femenina; corresponde She."
+  },
+  {
+    "topic": "Pronombres personales",
+    "situation": "Identifica al sujeto.",
+    "question": "Tom is my brother. ___ is my brother.",
+    "options": [
+      "She",
+      "It",
+      "He"
+    ],
+    "answer": "He",
+    "explanation": "Tom es masculino; corresponde He."
+  },
+  {
+    "topic": "Pronombres personales",
+    "situation": "Identifica al sujeto.",
+    "question": "The dog is small. ___ is small.",
+    "options": [
+      "They",
+      "We",
+      "It"
+    ],
+    "answer": "It",
+    "explanation": "It se usa para un animal o cosa en este nivel."
+  },
+  {
+    "topic": "Pronombres personales",
+    "situation": "Identifica al sujeto.",
+    "question": "My friends are here. ___ are here.",
+    "options": [
+      "They",
+      "He",
+      "I"
+    ],
+    "answer": "They",
+    "explanation": "My friends es plural; corresponde They."
+  },
+  {
+    "topic": "Familia",
+    "situation": "Reconoce el vocabulario.",
+    "question": "My father is my ___.",
+    "options": [
+      "dad",
+      "mother",
+      "sister"
+    ],
+    "answer": "dad",
+    "explanation": "Father significa padre; dad es una forma común de decir papá."
+  },
+  {
+    "topic": "Familia",
+    "situation": "Reconoce el vocabulario.",
+    "question": "My mother is my ___.",
+    "options": [
+      "uncle",
+      "sister",
+      "mom"
+    ],
+    "answer": "mom",
+    "explanation": "Mother significa madre; mom es una forma común de decir mamá."
+  },
+  {
+    "topic": "Familia",
+    "situation": "Reconoce el vocabulario.",
+    "question": "My mother's brother is my ___.",
+    "options": [
+      "aunt",
+      "cousin",
+      "uncle"
+    ],
+    "answer": "uncle",
+    "explanation": "El hermano de tu madre es tu uncle."
+  },
+  {
+    "topic": "Familia",
+    "situation": "Reconoce el vocabulario.",
+    "question": "My father's sister is my ___.",
+    "options": [
+      "aunt",
+      "uncle",
+      "daughter"
+    ],
+    "answer": "aunt",
+    "explanation": "La hermana de tu padre es tu aunt."
+  },
+  {
+    "topic": "Familia",
+    "situation": "Reconoce el vocabulario.",
+    "question": "My father's father is my ___.",
+    "options": [
+      "brother",
+      "grandfather",
+      "grandmother"
+    ],
+    "answer": "grandfather",
+    "explanation": "El padre de tu padre es tu grandfather."
+  },
+  {
+    "topic": "Alphabet – Letter sounds",
+    "situation": "Choose the Spanish approximation of the letter name.",
+    "question": "What is the pronunciation of the letter S?",
+    "options": [
+      "es",
+      "si",
+      "ei"
+    ],
+    "answer": 0,
+    "explanation": "The letter is pronounced approximately as “es”, according to the pronunciation table in the Cuadernillo I."
+  },
+  {
+    "topic": "Alphabet – Letter sounds",
+    "situation": "Choose the Spanish approximation of the letter name.",
+    "question": "What is the pronunciation of the letter A?",
+    "options": [
+      "ei",
+      "ai",
+      "i"
+    ],
+    "answer": 0,
+    "explanation": "The letter is pronounced approximately as “ei”, according to the pronunciation table in the Cuadernillo I."
+  },
+  {
+    "topic": "Alphabet – Letter sounds",
+    "situation": "Choose the Spanish approximation of the letter name.",
+    "question": "What is the pronunciation of the letter B?",
+    "options": [
+      "bi",
+      "di",
+      "vi"
+    ],
+    "answer": 0,
+    "explanation": "The letter is pronounced approximately as “bi”, according to the pronunciation table in the Cuadernillo I."
+  },
+  {
+    "topic": "Alphabet – Letter sounds",
+    "situation": "Choose the Spanish approximation of the letter name.",
+    "question": "What is the pronunciation of the letter C?",
+    "options": [
+      "si",
+      "kei",
+      "es"
+    ],
+    "answer": 0,
+    "explanation": "The letter is pronounced approximately as “si”, according to the pronunciation table in the Cuadernillo I."
+  },
+  {
+    "topic": "Alphabet – Letter sounds",
+    "situation": "Choose the Spanish approximation of the letter name.",
+    "question": "What is the pronunciation of the letter E?",
+    "options": [
+      "i",
+      "ei",
+      "ai"
+    ],
+    "answer": 0,
+    "explanation": "The letter is pronounced approximately as “i”, according to the pronunciation table in the Cuadernillo I."
+  },
+  {
+    "topic": "Alphabet – Letter sounds",
+    "situation": "Choose the Spanish approximation of the letter name.",
+    "question": "What is the pronunciation of the letter F?",
+    "options": [
+      "ef",
+      "if",
+      "ei"
+    ],
+    "answer": 0,
+    "explanation": "The letter is pronounced approximately as “ef”, according to the pronunciation table in the Cuadernillo I."
+  },
+  {
+    "topic": "Alphabet – Letter sounds",
+    "situation": "Choose the Spanish approximation of the letter name.",
+    "question": "What is the pronunciation of the letter H?",
+    "options": [
+      "eich",
+      "ei",
+      "e"
+    ],
+    "answer": 0,
+    "explanation": "The letter is pronounced approximately as “eich”, according to the pronunciation table in the Cuadernillo I."
+  },
+  {
+    "topic": "Alphabet – Letter sounds",
+    "situation": "Choose the Spanish approximation of the letter name.",
+    "question": "What is the pronunciation of the letter I?",
+    "options": [
+      "ai",
+      "i",
+      "ei"
+    ],
+    "answer": 0,
+    "explanation": "The letter is pronounced approximately as “ai”, according to the pronunciation table in the Cuadernillo I."
+  },
+  {
+    "topic": "Alphabet – Letter sounds",
+    "situation": "Choose the Spanish approximation of the letter name.",
+    "question": "What is the pronunciation of the letter J?",
+    "options": [
+      "yei",
+      "yi",
+      "je"
+    ],
+    "answer": 0,
+    "explanation": "The letter is pronounced approximately as “yei”, according to the pronunciation table in the Cuadernillo I."
+  },
+  {
+    "topic": "Alphabet – Letter sounds",
+    "situation": "Choose the Spanish approximation of the letter name.",
+    "question": "What is the pronunciation of the letter K?",
+    "options": [
+      "kei",
+      "kiu",
+      "kai"
+    ],
+    "answer": 0,
+    "explanation": "The letter is pronounced approximately as “kei”, according to the pronunciation table in the Cuadernillo I."
+  },
+  {
+    "topic": "Alphabet – Letter sounds",
+    "situation": "Choose the Spanish approximation of the letter name.",
+    "question": "What is the pronunciation of the letter M?",
+    "options": [
+      "em",
+      "en",
+      "ei"
+    ],
+    "answer": 0,
+    "explanation": "The letter is pronounced approximately as “em”, according to the pronunciation table in the Cuadernillo I."
+  },
+  {
+    "topic": "Alphabet – Letter sounds",
+    "situation": "Choose the Spanish approximation of the letter name.",
+    "question": "What is the pronunciation of the letter N?",
+    "options": [
+      "en",
+      "em",
+      "in"
+    ],
+    "answer": 0,
+    "explanation": "The letter is pronounced approximately as “en”, according to the pronunciation table in the Cuadernillo I."
+  },
+  {
+    "topic": "Alphabet – Letter sounds",
+    "situation": "Choose the Spanish approximation of the letter name.",
+    "question": "What is the pronunciation of the letter O?",
+    "options": [
+      "ou",
+      "u",
+      "ai"
+    ],
+    "answer": 0,
+    "explanation": "The letter is pronounced approximately as “ou”, according to the pronunciation table in the Cuadernillo I."
+  },
+  {
+    "topic": "Alphabet – Letter sounds",
+    "situation": "Choose the Spanish approximation of the letter name.",
+    "question": "What is the pronunciation of the letter P?",
+    "options": [
+      "pi",
+      "bi",
+      "pai"
+    ],
+    "answer": 0,
+    "explanation": "The letter is pronounced approximately as “pi”, according to the pronunciation table in the Cuadernillo I."
+  },
+  {
+    "topic": "Alphabet – Letter sounds",
+    "situation": "Choose the Spanish approximation of the letter name.",
+    "question": "What is the pronunciation of the letter Q?",
+    "options": [
+      "kiu",
+      "kei",
+      "ku"
+    ],
+    "answer": 0,
+    "explanation": "The letter is pronounced approximately as “kiu”, according to the pronunciation table in the Cuadernillo I."
+  },
+  {
+    "topic": "Alphabet – Letter sounds",
+    "situation": "Choose the Spanish approximation of the letter name.",
+    "question": "What is the pronunciation of the letter R?",
+    "options": [
+      "ar",
+      "er",
+      "ei"
+    ],
+    "answer": 0,
+    "explanation": "The letter is pronounced approximately as “ar”, according to the pronunciation table in the Cuadernillo I."
+  },
+  {
+    "topic": "Alphabet – Letter sounds",
+    "situation": "Choose the Spanish approximation of the letter name.",
+    "question": "What is the pronunciation of the letter T?",
+    "options": [
+      "ti",
+      "tei",
+      "di"
+    ],
+    "answer": 0,
+    "explanation": "The letter is pronounced approximately as “ti”, according to the pronunciation table in the Cuadernillo I."
+  },
+  {
+    "topic": "Alphabet – Letter sounds",
+    "situation": "Choose the Spanish approximation of the letter name.",
+    "question": "What is the pronunciation of the letter U?",
+    "options": [
+      "iu",
+      "u",
+      "ai"
+    ],
+    "answer": 0,
+    "explanation": "The letter is pronounced approximately as “iu”, according to the pronunciation table in the Cuadernillo I."
+  },
+  {
+    "topic": "Alphabet – Letter sounds",
+    "situation": "Choose the Spanish approximation of the letter name.",
+    "question": "What is the pronunciation of the letter V?",
+    "options": [
+      "vi",
+      "bi",
+      "vei"
+    ],
+    "answer": 0,
+    "explanation": "The letter is pronounced approximately as “vi”, according to the pronunciation table in the Cuadernillo I."
+  },
+  {
+    "topic": "Alphabet – Letter sounds",
+    "situation": "Choose the Spanish approximation of the letter name.",
+    "question": "What is the pronunciation of the letter W?",
+    "options": [
+      "dabol iu",
+      "wai",
+      "du"
+    ],
+    "answer": 0,
+    "explanation": "The letter is pronounced approximately as “dabol iu”, according to the pronunciation table in the Cuadernillo I."
+  },
+  {
+    "topic": "Alphabet – Letter sounds",
+    "situation": "Choose the Spanish approximation of the letter name.",
+    "question": "What is the pronunciation of the letter X?",
+    "options": [
+      "eks",
+      "eich",
+      "es"
+    ],
+    "answer": 0,
+    "explanation": "The letter is pronounced approximately as “eks”, according to the pronunciation table in the Cuadernillo I."
+  },
+  {
+    "topic": "Alphabet – Letter sounds",
+    "situation": "Choose the Spanish approximation of the letter name.",
+    "question": "What is the pronunciation of the letter Y?",
+    "options": [
+      "wai",
+      "yei",
+      "yi"
+    ],
+    "answer": 0,
+    "explanation": "The letter is pronounced approximately as “wai”, according to the pronunciation table in the Cuadernillo I."
+  },
+  {
+    "topic": "Alphabet – Letter sounds",
+    "situation": "Choose the Spanish approximation of the letter name.",
+    "question": "What is the pronunciation of the letter Z?",
+    "options": [
+      "zi",
+      "ze",
+      "si"
+    ],
+    "answer": 0,
+    "explanation": "The letter is pronounced approximately as “zi”, according to the pronunciation table in the Cuadernillo I."
+  },
+  {
+    "topic": "Greetings and Farewells",
+    "situation": "Elige el saludo adecuado.",
+    "question": "It is 8:00 a.m. You say:",
+    "options": [
+      "Good night",
+      "Good afternoon",
+      "Good morning"
+    ],
+    "answer": "Good morning",
+    "explanation": "Good morning se usa por la mañana."
+  },
+  {
+    "topic": "Greetings and Farewells",
+    "situation": "Elige el saludo adecuado.",
+    "question": "It is 3:00 p.m. You say:",
+    "options": [
+      "Good afternoon",
+      "Good morning",
+      "Good night"
+    ],
+    "answer": "Good afternoon",
+    "explanation": "Good afternoon se usa por la tarde."
+  },
+  {
+    "topic": "Greetings and Farewells",
+    "situation": "Distingue saludo y despedida.",
+    "question": "You are leaving at night. You say:",
+    "options": [
+      "Hello",
+      "Good night",
+      "Good evening"
+    ],
+    "answer": "Good night",
+    "explanation": "Good night funciona como despedida por la noche."
+  },
+  {
+    "topic": "Greetings and Farewells",
+    "situation": "Responde a una pregunta.",
+    "question": "How are you?",
+    "options": [
+      "Goodbye.",
+      "My name is Luis.",
+      "I’m fine, thanks."
+    ],
+    "answer": "I’m fine, thanks.",
+    "explanation": "La respuesta del cuadernillo a How are you? es I’m fine, thanks."
+  },
+  {
+    "topic": "Greetings and Farewells",
+    "situation": "Pregunta el nombre.",
+    "question": "To ask someone’s name, you say:",
+    "options": [
+      "What’s your name?",
+      "How are you?",
+      "See you later?"
+    ],
+    "answer": "What’s your name?",
+    "explanation": "What’s your name? significa “¿Cómo te llamas?”"
+  },
+  {
+    "topic": "Numbers",
+    "situation": "Reconoce el número.",
+    "question": "Which word means 1?",
+    "options": [
+      "One",
+      "Two",
+      "Ten"
+    ],
+    "answer": "One",
+    "explanation": "One significa uno."
+  },
+  {
+    "topic": "Numbers",
+    "situation": "Reconoce el número.",
+    "question": "Which word means 7?",
+    "options": [
+      "Eight",
+      "Seven",
+      "Six"
+    ],
+    "answer": "Seven",
+    "explanation": "Seven significa siete."
+  },
+  {
+    "topic": "Numbers",
+    "situation": "Reconoce el número.",
+    "question": "Which word means 10?",
+    "options": [
+      "Two",
+      "Three",
+      "Ten"
+    ],
+    "answer": "Ten",
+    "explanation": "Ten significa diez."
+  },
+  {
+    "topic": "Numbers",
+    "situation": "Reconoce el número.",
+    "question": "Which word means 4?",
+    "options": [
+      "Four",
+      "Five",
+      "Nine"
+    ],
+    "answer": "Four",
+    "explanation": "Four significa cuatro."
+  },
+  {
+    "topic": "Numbers",
+    "situation": "Relaciona número y palabra.",
+    "question": "Which word means 9?",
+    "options": [
+      "Five",
+      "Nine",
+      "Eight"
+    ],
+    "answer": "Nine",
+    "explanation": "Nine significa nueve."
+  },
+  {
+    "topic": "Numbers",
+    "situation": "Usa números en contexto.",
+    "question": "How many apples? — ___ apples.",
+    "options": [
+      "Thirteen",
+      "Thirty",
+      "Three"
+    ],
+    "answer": "Three",
+    "explanation": "Three significa tres."
+  },
+  {
+    "topic": "To Be – IS",
+    "situation": "Elige la forma correcta.",
+    "question": "He ___ a teacher.",
+    "options": [
+      "are",
+      "is",
+      "am"
+    ],
+    "answer": "is",
+    "explanation": "Is se usa con he, she e it."
+  },
+  {
+    "topic": "To Be – IS",
+    "situation": "Elige la forma correcta.",
+    "question": "She ___ happy.",
+    "options": [
+      "are",
+      "am",
+      "is"
+    ],
+    "answer": "is",
+    "explanation": "She se combina con is."
+  },
+  {
+    "topic": "To Be – IS",
+    "situation": "Elige la forma correcta.",
+    "question": "It ___ at home.",
+    "options": [
+      "is",
+      "are",
+      "am"
+    ],
+    "answer": "is",
+    "explanation": "It se combina con is."
+  },
+  {
+    "topic": "To Be – IS",
+    "situation": "Forma negativa.",
+    "question": "He is tired. Choose the negative form.",
+    "options": [
+      "He am not tired.",
+      "He is not tired.",
+      "He are not tired."
+    ],
+    "answer": "He is not tired.",
+    "explanation": "La forma negativa es sujeto + is not / isn’t."
+  },
+  {
+    "topic": "To Be – IS",
+    "situation": "Forma interrogativa.",
+    "question": "___ she your teacher?",
+    "options": [
+      "Are",
+      "Am",
+      "Is"
+    ],
+    "answer": "Is",
+    "explanation": "En preguntas con is, is va antes del sujeto."
+  },
+  {
+    "topic": "To Be – IS",
+    "situation": "Corrige el error.",
+    "question": "She are happy.",
+    "options": [
+      "She is happy.",
+      "She am happy.",
+      "She are happiness."
+    ],
+    "answer": "She is happy.",
+    "explanation": "She se combina con is, no con are."
+  },
+  {
+    "topic": "To Be – AM",
+    "situation": "Elige la forma correcta.",
+    "question": "I ___ a student.",
+    "options": [
+      "is",
+      "are",
+      "am"
+    ],
+    "answer": "am",
+    "explanation": "AM se usa exclusivamente con I."
+  },
+  {
+    "topic": "To Be – AM",
+    "situation": "Elige la forma correcta.",
+    "question": "I ___ happy.",
+    "options": [
+      "am",
+      "is",
+      "are"
+    ],
+    "answer": "am",
+    "explanation": "I se combina con am."
+  },
+  {
+    "topic": "To Be – AM",
+    "situation": "Forma negativa.",
+    "question": "I am tired. Choose the negative.",
+    "options": [
+      "I are not tired.",
+      "I am not tired.",
+      "I is not tired."
+    ],
+    "answer": "I am not tired.",
+    "explanation": "La forma negativa es I am not + complemento."
+  },
+  {
+    "topic": "To Be – AM",
+    "situation": "Forma interrogativa.",
+    "question": "___ I ready?",
+    "options": [
+      "Is",
+      "Are",
+      "Am"
+    ],
+    "answer": "Am",
+    "explanation": "La pregunta con I se forma Am I…?"
+  },
+  {
+    "topic": "To Be – AM",
+    "situation": "Completa la oración.",
+    "question": "I ___ from Peru.",
+    "options": [
+      "am",
+      "is",
+      "are"
+    ],
+    "answer": "am",
+    "explanation": "I se combina con am."
+  },
+  {
+    "topic": "To Be – AM",
+    "situation": "Completa la oración.",
+    "question": "I ___ at home.",
+    "options": [
+      "are",
+      "am",
+      "is"
+    ],
+    "answer": "am",
+    "explanation": "I se combina con am."
+  },
+  {
+    "topic": "To Be – ARE",
+    "situation": "Elige la forma correcta.",
+    "question": "You ___ my friend.",
+    "options": [
+      "are",
+      "is",
+      "am"
+    ],
+    "answer": "are",
+    "explanation": "Are se usa con you, we y they."
+  },
+  {
+    "topic": "To Be – ARE",
+    "situation": "Elige la forma correcta.",
+    "question": "We ___ happy.",
+    "options": [
+      "am",
+      "are",
+      "is"
+    ],
+    "answer": "are",
+    "explanation": "We se combina con are."
+  },
+  {
+    "topic": "To Be – ARE",
+    "situation": "Elige la forma correcta.",
+    "question": "They ___ students.",
+    "options": [
+      "is",
+      "am",
+      "are"
+    ],
+    "answer": "are",
+    "explanation": "They se combina con are."
+  },
+  {
+    "topic": "To Be – ARE",
+    "situation": "Forma negativa.",
+    "question": "They are tired. Choose the negative.",
+    "options": [
+      "They are not tired.",
+      "They is not tired.",
+      "They am not tired."
+    ],
+    "answer": "They are not tired.",
+    "explanation": "La forma negativa es are not / aren’t."
+  },
+  {
+    "topic": "To Be – ARE",
+    "situation": "Forma interrogativa.",
+    "question": "___ you a student?",
+    "options": [
+      "Am",
+      "Are",
+      "Is"
+    ],
+    "answer": "Are",
+    "explanation": "La pregunta con you se forma Are you…?"
+  },
+  {
+    "topic": "To Be – ARE",
+    "situation": "Forma interrogativa.",
+    "question": "___ they from Peru?",
+    "options": [
+      "Is",
+      "Am",
+      "Are"
+    ],
+    "answer": "Are",
+    "explanation": "They se combina con are, y are va al inicio de la pregunta."
+  },
+  {
+    "topic": "Age and Birthday",
+    "situation": "Pregunta por la edad.",
+    "question": "___ old are you?",
+    "options": [
+      "When",
+      "How",
+      "What"
+    ],
+    "answer": "How",
+    "explanation": "La expresión del cuadernillo es How old are you?"
+  },
+  {
+    "topic": "Age and Birthday",
+    "situation": "Responde sobre la edad.",
+    "question": "I ___ 12 years old.",
+    "options": [
+      "is",
+      "are",
+      "am"
+    ],
+    "answer": "am",
+    "explanation": "Con I se usa am."
+  },
+  {
+    "topic": "Age and Birthday",
+    "situation": "Pregunta por la edad de otra persona.",
+    "question": "How old ___ she?",
+    "options": [
+      "is",
+      "are",
+      "am"
+    ],
+    "answer": "is",
+    "explanation": "She se combina con is."
+  },
+  {
+    "topic": "Age and Birthday",
+    "situation": "Expresa la edad.",
+    "question": "He ___ 40 years old.",
+    "options": [
+      "am",
+      "is",
+      "are"
+    ],
+    "answer": "is",
+    "explanation": "He se combina con is."
+  },
+  {
+    "topic": "Age and Birthday",
+    "situation": "Pregunta por cumpleaños.",
+    "question": "___ is your birthday?",
+    "options": [
+      "What",
+      "How",
+      "When"
+    ],
+    "answer": "When",
+    "explanation": "When is your birthday? significa “¿Cuándo es tu cumpleaños?”"
+  },
+  {
+    "topic": "Age and Birthday",
+    "situation": "Usa preposición de mes.",
+    "question": "My birthday is ___ May.",
+    "options": [
+      "in",
+      "on",
+      "at"
+    ],
+    "answer": "in",
+    "explanation": "El cuadernillo usa in con meses."
+  },
+  {
+    "topic": "Personal Presentation",
+    "situation": "Completa una presentación.",
+    "question": "My ___ is Ana.",
+    "options": [
+      "live",
+      "from",
+      "name"
+    ],
+    "answer": "name",
+    "explanation": "La expresión es My name is…"
+  },
+  {
+    "topic": "Personal Presentation",
+    "situation": "Completa una presentación.",
+    "question": "I am ___ Colombia.",
+    "options": [
+      "from",
+      "in",
+      "on"
+    ],
+    "answer": "from",
+    "explanation": "I am from + país indica procedencia."
+  },
+  {
+    "topic": "Personal Presentation",
+    "situation": "Completa una presentación.",
+    "question": "I ___ in Lima.",
+    "options": [
+      "name",
+      "live",
+      "am"
+    ],
+    "answer": "live",
+    "explanation": "I live in + lugar indica dónde vives."
+  },
+  {
+    "topic": "Personal Presentation",
+    "situation": "Completa una presentación.",
+    "question": "I am a ___.",
+    "options": [
+      "students",
+      "study",
+      "student"
+    ],
+    "answer": "student",
+    "explanation": "Después de a va un sustantivo singular: a student."
+  },
+  {
+    "topic": "Personal Presentation",
+    "situation": "Completa una presentación.",
+    "question": "My favorite ___ is pizza.",
+    "options": [
+      "food",
+      "name",
+      "birthday"
+    ],
+    "answer": "food",
+    "explanation": "Food significa comida."
+  },
+  {
+    "topic": "Personal Presentation",
+    "situation": "Completa una presentación.",
+    "question": "Nice to ___ you.",
+    "options": [
+      "name",
+      "meet",
+      "see"
+    ],
+    "answer": "meet",
+    "explanation": "Nice to meet you es una expresión del cuadernillo."
+  },
+  {
+    "topic": "Indefinite Articles – A/AN",
+    "situation": "Elige el artículo.",
+    "question": "___ elephant",
+    "options": [
+      "an",
+      "a",
+      "the"
+    ],
+    "answer": "an",
+    "explanation": "Elephant comienza con sonido vocálico, por eso usamos an."
+  },
+  {
+    "topic": "Indefinite Articles – A/AN",
+    "situation": "Elige el artículo.",
+    "question": "___ banana",
+    "options": [
+      "the",
+      "a",
+      "an"
+    ],
+    "answer": "a",
+    "explanation": "Banana comienza con sonido consonántico, por eso usamos a."
+  },
+  {
+    "topic": "Indefinite Articles – A/AN",
+    "situation": "Elige el artículo.",
+    "question": "___ orange",
+    "options": [
+      "a",
+      "the",
+      "an"
+    ],
+    "answer": "an",
+    "explanation": "Orange comienza con sonido vocálico."
+  },
+  {
+    "topic": "Indefinite Articles – A/AN",
+    "situation": "Elige el artículo.",
+    "question": "___ cat",
+    "options": [
+      "a",
+      "an",
+      "the"
+    ],
+    "answer": "a",
+    "explanation": "Cat comienza con sonido consonántico."
+  },
+  {
+    "topic": "Indefinite Articles – A/AN",
+    "situation": "Elige el artículo.",
+    "question": "___ umbrella",
+    "options": [
+      "the",
+      "an",
+      "a"
+    ],
+    "answer": "an",
+    "explanation": "Umbrella comienza con sonido vocálico."
+  },
+  {
+    "topic": "Indefinite Articles – A/AN",
+    "situation": "Elige el artículo.",
+    "question": "___ dog",
+    "options": [
+      "an",
+      "the",
+      "a"
+    ],
+    "answer": "a",
+    "explanation": "Dog comienza con sonido consonántico."
+  },
+  {
+    "topic": "Definite Article – THE",
+    "situation": "Usa el artículo definido.",
+    "question": "I see ___ sun.",
+    "options": [
+      "an",
+      "the",
+      "a"
+    ],
+    "answer": "the",
+    "explanation": "The se usa para algo específico o conocido; el cuadernillo da I see the sun."
+  },
+  {
+    "topic": "Definite Article – THE",
+    "situation": "Usa el artículo definido.",
+    "question": "She opens ___ door.",
+    "options": [
+      "a",
+      "an",
+      "the"
+    ],
+    "answer": "the",
+    "explanation": "The acompaña un objeto específico o conocido."
+  },
+  {
+    "topic": "Definite Article – THE",
+    "situation": "Usa el artículo definido.",
+    "question": "We clean ___ floor.",
+    "options": [
+      "the",
+      "a",
+      "an"
+    ],
+    "answer": "the",
+    "explanation": "The se usa con el sustantivo específico floor."
+  },
+  {
+    "topic": "Definite Article – THE",
+    "situation": "Usa el artículo definido.",
+    "question": "He sits on ___ chair.",
+    "options": [
+      "an",
+      "the",
+      "a"
+    ],
+    "answer": "the",
+    "explanation": "En los ejercicios del cuadernillo se usa the con chair en este contexto."
+  },
+  {
+    "topic": "Definite Article – THE",
+    "situation": "Usa el artículo definido.",
+    "question": "I go to ___ school by bus.",
+    "options": [
+      "a",
+      "an",
+      "the"
+    ],
+    "answer": "the",
+    "explanation": "El cuadernillo presenta I go to the school by bus."
+  },
+  {
+    "topic": "Definite Article – THE",
+    "situation": "Usa el artículo definido.",
+    "question": "They visit ___ museum.",
+    "options": [
+      "the",
+      "a",
+      "an"
+    ],
+    "answer": "the",
+    "explanation": "El ejercicio del cuadernillo completa esta oración con the."
+  },
+  {
+    "topic": "Singular and Plural Nouns",
+    "situation": "Forma el plural regular.",
+    "question": "Dog →",
+    "options": [
+      "Doges",
+      "Dogies",
+      "Dogs"
+    ],
+    "answer": "Dogs",
+    "explanation": "La mayoría de sustantivos forman el plural añadiendo -s."
+  },
+  {
+    "topic": "Singular and Plural Nouns",
+    "situation": "Aplica -es.",
+    "question": "Box →",
+    "options": [
+      "Boxes",
+      "Boxs",
+      "Boxies"
+    ],
+    "answer": "Boxes",
+    "explanation": "Si termina en x, se añade -es."
+  },
+  {
+    "topic": "Singular and Plural Nouns",
+    "situation": "Aplica -es.",
+    "question": "Tomato →",
+    "options": [
+      "Tomaties",
+      "Tomatoes",
+      "Tomatos"
+    ],
+    "answer": "Tomatoes",
+    "explanation": "El cuadernillo presenta tomato → tomatoes."
+  },
+  {
+    "topic": "Singular and Plural Nouns",
+    "situation": "Aplica consonante + y.",
+    "question": "Baby →",
+    "options": [
+      "Babys",
+      "Babyes",
+      "Babies"
+    ],
+    "answer": "Babies",
+    "explanation": "Consonante + y cambia y por ies."
+  },
+  {
+    "topic": "Singular and Plural Nouns",
+    "situation": "Reconoce un plural irregular.",
+    "question": "Man →",
+    "options": [
+      "Men",
+      "Mans",
+      "Manes"
+    ],
+    "answer": "Men",
+    "explanation": "Man es irregular: man → men."
+  },
+  {
+    "topic": "Singular and Plural Nouns",
+    "situation": "Reconoce un plural irregular.",
+    "question": "Woman →",
+    "options": [
+      "Womanes",
+      "Women",
+      "Womans"
+    ],
+    "answer": "Women",
+    "explanation": "Woman es irregular: woman → women."
+  },
+  {
+    "topic": "Color Adjectives",
+    "situation": "Reconoce el color.",
+    "question": "The apple is ___. (rojo)",
+    "options": [
+      "red",
+      "green",
+      "blue"
+    ],
+    "answer": "red",
+    "explanation": "Red significa rojo."
+  },
+  {
+    "topic": "Color Adjectives",
+    "situation": "Reconoce el color.",
+    "question": "I see a ___ bird. (verde)",
+    "options": [
+      "pink",
+      "green",
+      "black"
+    ],
+    "answer": "green",
+    "explanation": "Green significa verde."
+  },
+  {
+    "topic": "Color Adjectives",
+    "situation": "Reconoce el color.",
+    "question": "Her car is ___. (negro)",
+    "options": [
+      "white",
+      "brown",
+      "black"
+    ],
+    "answer": "black",
+    "explanation": "Black significa negro."
+  },
+  {
+    "topic": "Color Adjectives",
+    "situation": "Reconoce el color.",
+    "question": "This is a ___ flower. (rosado)",
+    "options": [
+      "pink",
+      "purple",
+      "orange"
+    ],
+    "answer": "pink",
+    "explanation": "Pink significa rosado."
+  },
+  {
+    "topic": "Color Adjectives",
+    "situation": "Reconoce el color.",
+    "question": "My shoes are ___. (blanco)",
+    "options": [
+      "blue",
+      "white",
+      "yellow"
+    ],
+    "answer": "white",
+    "explanation": "White significa blanco."
+  },
+  {
+    "topic": "Color Adjectives",
+    "situation": "Reconoce el color.",
+    "question": "The pencil is ___. (amarillo)",
+    "options": [
+      "green",
+      "brown",
+      "yellow"
+    ],
+    "answer": "yellow",
+    "explanation": "Yellow significa amarillo."
+  },
+  {
+    "topic": "Repaso general",
+    "situation": "Pronombres + to be.",
+    "question": "___ are my friends.",
+    "options": [
+      "It",
+      "They",
+      "He"
+    ],
+    "answer": "They",
+    "explanation": "Friends es plural; el pronombre correcto es They y se combina con are."
+  },
+  {
+    "topic": "Repaso general",
+    "situation": "To be + age.",
+    "question": "I ___ 16 years old.",
+    "options": [
+      "is",
+      "are",
+      "am"
+    ],
+    "answer": "am",
+    "explanation": "I se combina con am."
+  }
+];
+
+let current = 0;
+let correct = 0;
+let wrong = 0;
+let answered = false;
+
+const questionEl = document.getElementById("question");
+const optionsEl = document.getElementById("options");
+const topicEl = document.getElementById("topic");
+const situationEl = document.getElementById("situation");
+const feedbackEl = document.getElementById("feedback");
+const explanationEl = document.getElementById("explanation");
+const nextBtn = document.getElementById("nextBtn");
+const progressEl = document.getElementById("progress");
+const currentNumEl = document.getElementById("currentNum");
+const totalNumEl = document.getElementById("totalNum");
+const percentEl = document.getElementById("percent");
+const correctCountEl = document.getElementById("correctCount");
+const wrongCountEl = document.getElementById("wrongCount");
+const cardEl = document.getElementById("card");
+const finalEl = document.getElementById("final");
+const finalScoreEl = document.getElementById("finalScore");
+const finalMessageEl = document.getElementById("finalMessage");
+const restartBtn = document.getElementById("restartBtn");
+
+totalNumEl.textContent = questions.length;
+
+function renderQuestion() {
+  const q = questions[current];
+  answered = false;
+
+  topicEl.textContent = q.topic || "";
+  situationEl.textContent = q.situation || "";
+  questionEl.textContent = q.question || "";
+  optionsEl.innerHTML = "";
+  feedbackEl.style.display = "none";
+  explanationEl.style.display = "none";
+  nextBtn.style.display = "none";
+
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement("button");
+    btn.className = "option";
+    btn.type = "button";
+    btn.textContent = opt;
+    btn.addEventListener("click", () => checkAnswer(i, btn));
+    optionsEl.appendChild(btn);
+  });
+
+  const pct = Math.round(((current + 1) / questions.length) * 100);
+  progressEl.style.width = pct + "%";
+  currentNumEl.textContent = current + 1;
+  percentEl.textContent = pct + "%";
+  correctCountEl.textContent = correct;
+  wrongCountEl.textContent = wrong;
+}
+
+function isCorrect(q, index) {
+  // Supports both answer formats used in the original file:
+  // numeric option index (e.g. alphabet) and answer text (other topics).
+  return index === q.answer || q.options[index] === q.answer;
+}
+
+function checkAnswer(index, clickedBtn) {
+  if (answered) return;
+  answered = true;
+
+  const q = questions[current];
+  const buttons = [...document.querySelectorAll(".option")];
+  const rightIndex = typeof q.answer === "number"
+    ? q.answer
+    : q.options.indexOf(q.answer);
+
+  buttons.forEach((b, i) => {
+    b.disabled = true;
+    if (i === rightIndex) b.classList.add("correct");
+  });
+
+  if (isCorrect(q, index)) {
+    correct++;
+    clickedBtn.classList.add("selected");
+    feedbackEl.textContent = "✓ Correcto";
+    feedbackEl.className = "feedback correct-feedback";
+  } else {
+    wrong++;
+    clickedBtn.classList.add("wrong");
+    feedbackEl.textContent = "✗ Incorrecto";
+    feedbackEl.className = "feedback wrong-feedback";
+  }
+
+  feedbackEl.style.display = "block";
+  explanationEl.textContent = q.explanation || "";
+  explanationEl.style.display = q.explanation ? "block" : "none";
+  correctCountEl.textContent = correct;
+  wrongCountEl.textContent = wrong;
+  nextBtn.style.display = "block";
+  nextBtn.textContent = current < questions.length - 1 ? "Siguiente →" : "Ver resultado";
+}
+
+nextBtn.addEventListener("click", () => {
+  if (!answered) return;
+  if (current < questions.length - 1) {
+    current++;
+    renderQuestion();
+    window.scrollTo({top:0, behavior:"smooth"});
+  } else {
+    showFinal();
+  }
+});
+
+function showFinal() {
+  cardEl.style.display = "none";
+  finalEl.style.display = "block";
+  const pct = Math.round((correct / questions.length) * 100);
+  finalScoreEl.textContent = `${correct} / ${questions.length} (${pct}%)`;
+  finalMessageEl.textContent = `Correctas: ${correct} · Incorrectas: ${wrong}`;
+  progressEl.style.width = "100%";
+  percentEl.textContent = "100%";
+}
+
+restartBtn.addEventListener("click", () => {
+  current = 0;
+  correct = 0;
+  wrong = 0;
+  finalEl.style.display = "none";
+  cardEl.style.display = "block";
+  renderQuestion();
+  window.scrollTo({top:0, behavior:"smooth"});
+});
+
+renderQuestion();
+</script>
+</body>
+</html>
